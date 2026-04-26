@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ Channel Reactor Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle at top, #0f172a, #020617);
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      width: 420px;
+      padding: 30px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(15px);
+      box-shadow: 0 0 40px rgba(0,255,255,0.2);
+      text-align: center;
+      animation: glow 3s infinite alternate;
+    }
+
+    @keyframes glow {
+      from { box-shadow: 0 0 20px #0ff; }
+      to { box-shadow: 0 0 40px #00f0ff; }
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    input::placeholder { color: #ccc; }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(45deg, #00f0ff, #00ffa6);
+      color: #000;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px #00f0ff;
+    }
+
+    .status {
+      margin-top: 15px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    footer {
+      margin-top: 20px;
+      font-size: 12px;
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>⚡ Reactor Pro</h1>
+
+  <input type="text" id="link" placeholder="WhatsApp Channel Post Link">
+  <input type="text" id="emojis" placeholder="Emojis (e.g 😭,🔥)">
+
+  <button onclick="sendReaction()">Send Reaction</button>
+
+  <div class="status" id="status"></div>
+
+  <footer>Powered by PROGRESS TECH</footer>
+</div>
+
+<script>
+  async function sendReaction() {
+    const link = document.getElementById('link').value.trim();
+    const emojis = document.getElementById('emojis').value.trim();
+    const status = document.getElementById('status');
+
+    if (!link.includes('whatsapp.com/channel/')) {
+      status.innerText = '❌ Invalid WhatsApp link';
+      return;
+    }
+
+    if (!emojis) {
+      status.innerText = '❌ Enter emojis';
+      return;
+    }
+
+    status.innerText = '⏳ Processing...';
+
+    try {
+      const recaptcha = await fetch(`https://omegatech-api.dixonomega.tech/api/tools/recaptcha-v3?sitekey=6LemKk8sAAAAAH5PB3f1EspbMlXjtwv5C8tiMHSm&url=https://back.asitha.top/api&use_enterprise=false`)
+        .then(res => res.json());
+
+      if (!recaptcha.success) throw new Error('Recaptcha failed');
+
+      const temp = await fetch('https://back.asitha.top/api/user/get-temp-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'userJwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...''
+        },
+        body: JSON.stringify({ recaptcha_token: recaptcha.token })
+      }).then(res => res.json());
+
+      if (!temp.token) throw new Error('Temp key failed');
+
+      const react = await fetch(`https://back.asitha.top/api/channel/react-to-post?apiKey=${temp.token}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'userJwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...''
+        },
+        body: JSON.stringify({
+          post_link: link,
+          reacts: emojis
+        })
+      }).then(res => res.json());
+
+      status.innerText = '✅ Reactions sent successfully!';
+
+    } catch (err) {
+      status.innerText = '❌ Error: ' + err.message;
+    }
+  }
+</script>
+
+</body>
+</html>
